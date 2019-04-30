@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Scrypta = require("../libs/Crypto");
+const Crypto = require("../libs/Crypto");
 function getinfo(req, res) {
-    var wallet = new Scrypta.Wallet;
+    var wallet = new Crypto.Wallet;
     wallet.request('getinfo').then(function (info) {
         res.json(info['result']);
     });
@@ -10,7 +10,7 @@ function getinfo(req, res) {
 exports.getinfo = getinfo;
 ;
 function getbalance(req, res) {
-    var wallet = new Scrypta.Wallet;
+    var wallet = new Crypto.Wallet;
     wallet.request('getbalance').then(function (info) {
         res.json({
             data: info['result'],

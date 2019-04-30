@@ -12,7 +12,7 @@ module Crypto {
             var rpcuser = process.env.RPCUSER
             var rpcpassword = process.env.RPCPASSWORD
             let req = {
-                url: 'http://localhost:' + process.env.RPCPORT,
+                url: 'http://'+ process.env.RPCADDRESS +':' + process.env.RPCPORT,
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
