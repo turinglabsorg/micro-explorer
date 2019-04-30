@@ -17,8 +17,12 @@ var Crypto;
                 return new Promise(response => {
                     var rpcuser = process.env.RPCUSER;
                     var rpcpassword = process.env.RPCPASSWORD;
+                    var rpcendpoint = 'http://' + process.env.RPCADDRESS + ':' + process.env.RPCPORT;
+                    if (process.env.DEBUG === "full") {
+                        console.log('Connecting to ' + rpcendpoint + ' WITH ' + rpcuser + '/' + rpcpassword);
+                    }
                     let req = {
-                        url: 'http://192.168.1.9:' + process.env.RPCPORT,
+                        url: rpcendpoint,
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -32,6 +36,9 @@ var Crypto;
                     };
                     request(req, function (err, res, body) {
                         try {
+                            if (process.env.DEBUG === "full") {
+                                console.log(body);
+                            }
                             response(JSON.parse(body));
                         }
                         catch (err) {

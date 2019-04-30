@@ -1,7 +1,7 @@
 import * as express from 'express'
 import * as Utilities from './libs/Utilities'
-import * as walletRouter from "./routes/Wallet"
-import * as explorerRouter from "./routes/Explorer"
+import * as wallet from "./routes/Wallet"
+import * as explorer from "./routes/Explorer"
 
 var Engine = require('tingodb')()
 var bodyParser = require('body-parser')
@@ -22,9 +22,9 @@ class App {
     app.express.use(express.static('public'))
     app.express.use(cors())
     
-    app.express.get('/',explorerRouter.info)
-    app.express.get('/wallet/getinfo',walletRouter.getinfo)
-    app.express.post('/wallet/getbalance',walletRouter.getbalance)
+    app.express.get('/',explorer.info)
+    app.express.get('/wallet/getinfo',wallet.getinfo)
+    app.express.post('/wallet/getblock',wallet.getblock)
   }
 }
 

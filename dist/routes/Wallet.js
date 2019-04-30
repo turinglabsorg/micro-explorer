@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Crypto = require("../libs/Crypto");
+const Utilities = require("../libs/Utilities");
 function getinfo(req, res) {
     var wallet = new Crypto.Wallet;
     wallet.request('getinfo').then(function (info) {
@@ -9,15 +10,28 @@ function getinfo(req, res) {
 }
 exports.getinfo = getinfo;
 ;
-function getbalance(req, res) {
+function getblock(req, res) {
     var wallet = new Crypto.Wallet;
-    wallet.request('getbalance').then(function (info) {
-        res.json({
-            data: info['result'],
-            status: 200
-        });
+    var utilities = new Utilities.Parser;
+    utilities.body(req).then(function (body) {
+        if (body['block']) {
+            wallet.request('getblockhash', [parseInt(body['block'])]).then(function (blockhash) {
+                wallet.request('getblock', [blockhash['result']]).then(function (block) {
+                    res.json({
+                        data: block['result'],
+                        status: 200
+                    });
+                });
+            });
+        }
+        else {
+            res.json({
+                data: 'Missing parameter: block',
+                status: 422
+            });
+        }
     });
 }
-exports.getbalance = getbalance;
+exports.getblock = getblock;
 ;
 //# sourceMappingURL=Wallet.js.map
