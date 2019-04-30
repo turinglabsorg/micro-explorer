@@ -4,12 +4,10 @@
   "description": "Multicurrency microexplorer",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && cd dist && pkg . --out-path=pkgs --targets=linux",
     "dev": "tsc --watch & nodemon dist",
     "test": "tsc && mocha dist/**/*.spec.js",
     "lint": "eslint src --ext ts",
-    "tsc": "tsc",
-    "dist": "cd dist/pkgs && ./micro-explorer-dist"
+    "tsc": "tsc"
   },
   "keywords": [],
   "author": "",
