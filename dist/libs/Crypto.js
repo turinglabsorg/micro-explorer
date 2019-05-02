@@ -7,18 +7,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+const Utilities = require("./Utilities");
 let request = require("request");
 var Engine = require('tingodb')();
 var Crypto;
 (function (Crypto) {
     class Wallet {
-        hex2a(hexx) {
-            var hex = hexx.toString(); //force conversion
-            var str = '';
-            for (var i = 0; (i < hex.length && hex.substr(i, 2) !== '00'); i += 2)
-                str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-            return str;
-        }
         request(method, params = []) {
             return __awaiter(this, void 0, void 0, function* () {
                 return new Promise(response => {
@@ -128,7 +122,8 @@ var Crypto;
                                             }
                                             //CHECKING OP_RETURN
                                             if (block['result']['tx'][i]['vout'][voutx]['scriptPubKey']['asm'].indexOf('OP_RETURN') !== -1) {
-                                                var OP_RETURN = wallet.hex2a(block['result']['tx'][i]['vout'][voutx]['scriptPubKey']['asm'].replace('OP_RETURN ', ''));
+                                                var parser = new Utilities.Parser;
+                                                var OP_RETURN = parser.hex2a(block['result']['tx'][i]['vout'][voutx]['scriptPubKey']['asm'].replace('OP_RETURN ', ''));
                                                 if (block['result']['data'][receivingaddress] === undefined) {
                                                     block['result']['data'][receivingaddress] = [];
                                                 }

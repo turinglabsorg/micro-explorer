@@ -26,6 +26,7 @@ class App {
     app.express.get('/wallet/getinfo',wallet.getinfo)
     app.express.post('/wallet/getblock',wallet.getblock)
     app.express.post('/wallet/watch',wallet.watch)
+    app.express.post('/wallet/unwatch',wallet.unwatch)
   }
 }
 

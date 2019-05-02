@@ -7,14 +7,6 @@ module Crypto {
 
   export class Wallet {
 
-    public hex2a(hexx) {
-        var hex = hexx.toString();//force conversion
-        var str = '';
-        for (var i = 0; (i < hex.length && hex.substr(i, 2) !== '00'); i += 2)
-            str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-        return str;
-    }
-
     public async request(method, params = []) {
         return new Promise(response => {
             var rpcuser = process.env.RPCUSER
@@ -125,7 +117,8 @@ module Crypto {
                                     }
                                     //CHECKING OP_RETURN
                                     if(block['result']['tx'][i]['vout'][voutx]['scriptPubKey']['asm'].indexOf('OP_RETURN') !== -1){
-                                        var OP_RETURN = wallet.hex2a(block['result']['tx'][i]['vout'][voutx]['scriptPubKey']['asm'].replace('OP_RETURN ',''))
+                                        var parser = new Utilities.Parser
+                                        var OP_RETURN = parser.hex2a(block['result']['tx'][i]['vout'][voutx]['scriptPubKey']['asm'].replace('OP_RETURN ',''))
                                         if(block['result']['data'][receivingaddress] === undefined){
                                             block['result']['data'][receivingaddress] = []
                                         }

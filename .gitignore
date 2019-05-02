@@ -3,3 +3,4 @@
 /src/.env
 /dist/.env
 /dist
+/db
