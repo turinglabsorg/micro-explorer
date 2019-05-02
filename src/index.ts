@@ -1,6 +1,6 @@
 import app from './App'
 import * as Crypto from './libs/Crypto'
-import * as Background from "./libs/Background"
+import * as Selective from "./libs/Selective"
 
 require('dotenv').config()
 const port = process.env.PORT || 4001
@@ -14,7 +14,11 @@ app.listen(port, (err) => {
   wallet.request('getinfo').then(function(info){
     if(info !== undefined){
       console.log(process.env.COIN + ' wallet successfully connected.')
-      var task = new Background.Sync
+      if(process.env.MODE === 'selective'){
+        var task = new Selective.Sync
+      }else{
+        //NEED TO IMPLEMENT FULL MODE
+      }
       task.init()
     }else{
       console.log('Can\'t communicate with wallet, please check RPC.')

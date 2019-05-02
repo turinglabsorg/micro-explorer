@@ -7,7 +7,7 @@ var blocks = {}
 var analyze = []
 var addresses = []
 
-module Background {
+module Selective {
 
   export class Sync {
     
@@ -41,7 +41,7 @@ module Background {
                             }
                         }
                     })
-                    var task = new Background.Sync
+                    var task = new Selective.Sync
                     task.process()
                 })
             }else{
@@ -57,7 +57,7 @@ module Background {
         var checked = 0
         for(var address in blocks){
             tocheck += blocks[address].length
-            console.log('PROCESSING ADDRESS ' + address + ', NEED TO CHECK ' + tocheck + ' BLOCKS')
+            console.log('PROCESSING ADDRESS ' + address)
             var indexes = db.collection("indexes")
             blocks[address].forEach(block => {
                 indexes.findOne({address: address, block: block}, function(err, item) {
@@ -66,8 +66,8 @@ module Background {
                        analyze.push(block)
                     }
                     if(checked === tocheck){
-                        console.log(checked + ' CHECKED, ' + analyze.length + ' TO ANALYZE')
-                        var task = new Background.Sync
+                        console.log('NEED TO ANALYZE ' + analyze.length + ' BLOCKS')
+                        var task = new Selective.Sync
                         task.analyze()
                     }
                 })
@@ -112,12 +112,12 @@ module Background {
             var elapsed = (end - start) / 1000
             analyze.shift()
             console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +' BLOCKS TO COMPLETE: ' + analyze.length)
-            var task = new Background.Sync
+            var task = new Selective.Sync
             task.analyze()
         }else{
             console.log('\x1b[41m%s\x1b[0m', 'ANALYZED EVERYTHING REBOOTING PROCESS IN 30 SECONDS')
             setTimeout(function(){
-                var task = new Background.Sync
+                var task = new Selective.Sync
                 task.init()
             },30000)
         }
@@ -127,4 +127,4 @@ module Background {
 
 }
 
-export = Background;
+export = Selective;
