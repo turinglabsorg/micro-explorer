@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const App_1 = require("./App");
 const Crypto = require("./libs/Crypto");
+const Background = require("./libs/Background");
 require('dotenv').config();
 const port = process.env.PORT || 4001;
 App_1.default.engine('html', require('ejs').renderFile);
@@ -13,6 +14,8 @@ App_1.default.listen(port, (err) => {
     wallet.request('getinfo').then(function (info) {
         if (info !== undefined) {
             console.log(process.env.COIN + ' wallet successfully connected.');
+            var task = new Background.Sync;
+            task.init();
         }
         else {
             console.log('Can\'t communicate with wallet, please check RPC.');

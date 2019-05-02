@@ -10,13 +10,16 @@ export function watch(req: express.Request, res: express.Response) {
             var db = new Engine.Db('./db', {})
             var collection = db.collection("addresses")
             var address = body['address']
-
-            collection.findOne({address: address}, function(err, item) {
-                if(item === null){
-                    collection.insert({blockchain: process.env.COIN, address: address})
-                }
-            })
             
+            var wallet = new Crypto.Wallet
+            wallet.request('importaddress',[address, "", true]).then(function(response){
+                collection.findOne({address: address}, function(err, item) {
+                    if(item === null){
+                        collection.insert({blockchain: process.env.COIN, address: address})
+                    }
+                })
+            })
+
             res.json({
                 data: 'WATCHING',
                 status: 200
@@ -77,6 +80,7 @@ export function watchlist(req: express.Request, res: express.Response) {
         })
     })
 };
+
 export function address(req: express.Request, res: express.Response) {
     var address = req.params.address
     var db = new Engine.Db('./db', {})

@@ -16,10 +16,12 @@ function getblock(req, res) {
     var utilities = new Utilities.Parser;
     utilities.body(req).then(function (body) {
         if (body['block']) {
-            wallet.analyzeBlock(body['block']).then(response => {
-                res.json({
-                    data: response,
-                    status: 200
+            wallet.request('getblockhash', [parseInt(body['block'])]).then(function (blockhash) {
+                wallet.analyzeBlock(blockhash['result']).then(response => {
+                    res.json({
+                        data: response,
+                        status: 200
+                    });
                 });
             });
         }
