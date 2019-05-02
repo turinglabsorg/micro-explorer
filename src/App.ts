@@ -1,6 +1,7 @@
 import * as express from 'express'
 import * as Utilities from './libs/Utilities'
 import * as wallet from "./routes/Wallet"
+import * as stats from "./routes/Stats"
 import * as explorer from "./routes/Explorer"
 
 var Engine = require('tingodb')()
@@ -25,8 +26,11 @@ class App {
     app.express.get('/',explorer.info)
     app.express.get('/wallet/getinfo',wallet.getinfo)
     app.express.post('/wallet/getblock',wallet.getblock)
-    app.express.post('/wallet/watch',wallet.watch)
-    app.express.post('/wallet/unwatch',wallet.unwatch)
+
+    app.express.post('/stats/watch',stats.watch)
+    app.express.post('/stats/unwatch',stats.unwatch)
+    app.express.post('/stats/watchlist',stats.watchlist)
+    app.express.get('/stats/:address', stats.address)
   }
 }
 
