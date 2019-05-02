@@ -147,8 +147,8 @@ var Crypto;
                                 var blocktotvalue = block['result']['totvin'] + block['result']['generated'];
                                 block['result']['fees'] = (block['result']['totvout'] - blocktotvalue) * -1;
                                 //CHECKING TRANSACTION TYPE
-                                for (var txid in block['result']['balances']) {
-                                    for (var address in block['result']['balances'][txid]) {
+                                for (let txid in block['result']['balances']) {
+                                    for (let address in block['result']['balances'][txid]) {
                                         if (block['result']['balances'][txid][address]['vin'] > 0) {
                                             if (block['result']['balances'][txid][address]['vin'] < block['result']['balances'][txid][address]['vout']) {
                                                 block['result']['balances'][txid][address]['type'] = 'STAKE';

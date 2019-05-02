@@ -18,6 +18,7 @@ class App {
         app.express.get('/', explorer.info);
         app.express.get('/wallet/getinfo', wallet.getinfo);
         app.express.post('/wallet/getblock', wallet.getblock);
+        app.express.post('/wallet/watch', wallet.watch);
     }
 }
 exports.default = new App().express;

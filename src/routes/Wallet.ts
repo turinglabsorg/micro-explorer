@@ -2,7 +2,6 @@ import express = require("express")
 import * as Crypto from '../libs/Crypto'
 import * as Utilities from '../libs/Utilities'
 
-
 export function getinfo(req: express.Request, res: express.Response) {
     var wallet = new Crypto.Wallet;
     wallet.request('getinfo').then(function(info){
@@ -24,6 +23,20 @@ export function getblock(req: express.Request, res: express.Response) {
         }else{
             res.json({
                 data: 'Missing parameter: block',
+                status: 422
+            })
+        }
+    })
+};
+
+export function watch(req: express.Request, res: express.Response) {
+    var utilities = new Utilities.Parser
+    utilities.body(req).then(function(body){
+        if(body['address']){
+            
+        }else{
+            res.json({
+                data: 'Missing parameter: address',
                 status: 422
             })
         }

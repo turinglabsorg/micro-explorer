@@ -32,4 +32,19 @@ function getblock(req, res) {
 }
 exports.getblock = getblock;
 ;
+function watch(req, res) {
+    var utilities = new Utilities.Parser;
+    utilities.body(req).then(function (body) {
+        if (body['address']) {
+        }
+        else {
+            res.json({
+                data: 'Missing parameter: address',
+                status: 422
+            });
+        }
+    });
+}
+exports.watch = watch;
+;
 //# sourceMappingURL=Wallet.js.map
