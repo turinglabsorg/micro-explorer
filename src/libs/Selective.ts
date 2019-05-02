@@ -3,7 +3,7 @@ var Engine = require('tingodb')()
 import express = require("express")
 import * as Crypto from './Crypto'
 
-var blocks = {}
+var blocks = []
 var analyze = []
 var addresses = []
 
@@ -33,11 +33,8 @@ module Selective {
                     var transactions = result['result']
                     transactions.forEach(function(tx){
                         if(addresses.indexOf(tx.address) !== -1){
-                            if(!blocks[tx.address]){
-                                blocks[tx.address] = []
-                            }
-                            if(blocks[tx.address].indexOf(tx.blockhash) === -1){
-                                blocks[tx.address].push(tx.blockhash)
+                            if(blocks.indexOf(tx.blockhash) === -1){
+                                blocks.push(tx.blockhash)
                             }
                         }
                     })
@@ -45,24 +42,32 @@ module Selective {
                     task.process()
                 })
             }else{
-                console.log('NO ADDRESS TO WATCH')
+                console.log('NO ADDRESS TO WATCH, RETRY IN 60s')
+                setTimeout(function(){
+                    var task = new Selective.Sync
+                    task.process()
+                },60000)
             }
         })
     }
 
     public async process(){
         var db = new Engine.Db('./db', {})
-        console.log('PROCESSING BLOCKS')
-        var tocheck = 0
+        var tocheck = blocks.length
+        console.log('PROCESSING ' + tocheck + ' BLOCKS')
         var checked = 0
-        for(var address in blocks){
-            tocheck += blocks[address].length
+        for(var ain in addresses){
+            var address = addresses[ain]
             console.log('PROCESSING ADDRESS ' + address)
             var indexes = db.collection("indexes")
-            blocks[address].forEach(block => {
-                indexes.findOne({address: address, block: block}, function(err, item) {
+            indexes.find().toArray(function(err, items) {
+                var scanned = []
+                items.forEach(scan => {
+                    scanned.push(scan['block'] + '/' + scan['address'])
+                })
+                blocks.forEach(block => {
                     checked++
-                    if(item === null){
+                    if(scanned.indexOf(block+'/'+address) === -1){
                        analyze.push(block)
                     }
                     if(checked === tocheck){
@@ -111,7 +116,7 @@ module Selective {
             var end = Date.now()
             var elapsed = (end - start) / 1000
             analyze.shift()
-            console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +' BLOCKS TO COMPLETE: ' + analyze.length)
+            console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +'s. BLOCKS TO COMPLETE: ' + analyze.length)
             var task = new Selective.Sync
             task.analyze()
         }else{

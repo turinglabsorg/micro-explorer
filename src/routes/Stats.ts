@@ -12,8 +12,8 @@ export function watch(req: express.Request, res: express.Response) {
             var address = body['address']
             
             var wallet = new Crypto.Wallet
-            wallet.request('importaddress',[address, "", true]).then(function(response){
-                collection.findOne({address: address}, function(err, item) {
+            collection.findOne({address: address}, function(err, item) {
+                wallet.request('importaddress',[address, "", true]).then(function(response){
                     if(item === null){
                         collection.insert({blockchain: process.env.COIN, address: address})
                     }
