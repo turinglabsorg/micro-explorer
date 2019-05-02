@@ -54,7 +54,7 @@ module Selective {
     public async process(){
         var db = new Engine.Db('./db', {})
         var tocheck = blocks.length
-        console.log('PROCESSING ' + tocheck + ' BLOCKS')
+        console.log('FOUND ' + tocheck + ' BLOCKS WITH INVOLVED TRANSACTIONS')
         var checked = 0
         for(var ain in addresses){
             var address = addresses[ain]
@@ -68,7 +68,9 @@ module Selective {
                 blocks.forEach(block => {
                     checked++
                     if(scanned.indexOf(block+'/'+address) === -1){
-                       analyze.push(block)
+                        if(analyze.indexOf(block) === -1){
+                            analyze.push(block)
+                        }
                     }
                     if(checked === tocheck){
                         console.log('NEED TO ANALYZE ' + analyze.length + ' BLOCKS')
