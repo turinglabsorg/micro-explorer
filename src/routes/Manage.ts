@@ -81,15 +81,3 @@ export function watchlist(req: express.Request, res: express.Response) {
     })
 };
 
-export function address(req: express.Request, res: express.Response) {
-    var address = req.params.address
-    var db = new Engine.Db('./db', {})
-    var collection = db.collection("stats")
-
-    collection.find({address: address}).toArray(function(err, items) {
-        res.json({
-            data: items,
-            status: 200
-        })
-    })
-};

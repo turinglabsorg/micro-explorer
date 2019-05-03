@@ -57,7 +57,7 @@ var Crypto;
                         block['result']['totvin'] = 0;
                         block['result']['totvout'] = 0;
                         block['result']['fees'] = 0;
-                        block['result']['balances'] = {};
+                        block['result']['analysis'] = {};
                         block['result']['data'] = {};
                         //PARSING ALL TRANSACTIONS
                         new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
@@ -68,6 +68,10 @@ var Crypto;
                                 block['result']['tx'][i] = tx['result'];
                                 var txtotvin = 0;
                                 var txtotvout = 0;
+                                block['result']['analysis'][txid] = {};
+                                block['result']['analysis'][txid]['vin'] = 0;
+                                block['result']['analysis'][txid]['vout'] = 0;
+                                block['result']['analysis'][txid]['balances'] = {};
                                 //FETCHING ALL VIN
                                 for (var vinx = 0; vinx < block['result']['tx'][i]['vin'].length; vinx++) {
                                     var vout = block['result']['tx'][i]['vin'][vinx]['vout'];
@@ -80,18 +84,16 @@ var Crypto;
                                         block['result']['tx'][i]['vin'][vinx]['addresses'] = txvin['result']['vout'][vout]['scriptPubKey']['addresses'];
                                         for (var key in txvin['result']['vout'][vout]['scriptPubKey']['addresses']) {
                                             var address = txvin['result']['vout'][vout]['scriptPubKey']['addresses'][key];
-                                            if (block['result']['balances'][address] === undefined) {
-                                                block['result']['balances'][address] = {};
+                                            if (block['result']['analysis'][txid]['balances'][address] === undefined) {
+                                                block['result']['analysis'][txid]['balances'][address] = {};
+                                                block['result']['analysis'][txid]['balances'][address]['value'] = 0;
+                                                block['result']['analysis'][txid]['balances'][address]['type'] = 'TX';
+                                                block['result']['analysis'][txid]['balances'][address]['vin'] = 0;
+                                                block['result']['analysis'][txid]['balances'][address]['vout'] = 0;
                                             }
-                                            if (block['result']['balances'][address][txid] === undefined) {
-                                                block['result']['balances'][address][txid] = {};
-                                                block['result']['balances'][address][txid]['value'] = 0;
-                                                block['result']['balances'][address][txid]['vin'] = 0;
-                                                block['result']['balances'][address][txid]['vout'] = 0;
-                                                block['result']['balances'][address][txid]['type'] = 'TX';
-                                            }
-                                            block['result']['balances'][address][txid]['value'] -= txvin['result']['vout'][vout]['value'];
-                                            block['result']['balances'][address][txid]['vin'] += txvin['result']['vout'][vout]['value'];
+                                            block['result']['analysis'][txid]['balances'][address]['value'] -= txvin['result']['vout'][vout]['value'];
+                                            block['result']['analysis'][txid]['vin'] += txvin['result']['vout'][vout]['value'];
+                                            block['result']['analysis'][txid]['balances'][address]['vin'] += txvin['result']['vout'][vout]['value'];
                                             txtotvin += txvin['result']['vout'][vout]['value'];
                                         }
                                     }
@@ -105,18 +107,16 @@ var Crypto;
                                         //CHECKING VALUES OUT
                                         if (block['result']['tx'][i]['vout'][voutx]['scriptPubKey']['addresses']) {
                                             block['result']['tx'][i]['vout'][voutx]['scriptPubKey']['addresses'].forEach(function (address, index) {
-                                                if (block['result']['balances'][address] === undefined) {
-                                                    block['result']['balances'][address] = {};
+                                                if (block['result']['analysis'][txid]['balances'][address] === undefined) {
+                                                    block['result']['analysis'][txid]['balances'][address] = {};
+                                                    block['result']['analysis'][txid]['balances'][address]['value'] = 0;
+                                                    block['result']['analysis'][txid]['balances'][address]['type'] = 'TX';
+                                                    block['result']['analysis'][txid]['balances'][address]['vin'] = 0;
+                                                    block['result']['analysis'][txid]['balances'][address]['vout'] = 0;
                                                 }
-                                                if (block['result']['balances'][address][txid] === undefined) {
-                                                    block['result']['balances'][address][txid] = {};
-                                                    block['result']['balances'][address][txid]['value'] = 0;
-                                                    block['result']['balances'][address][txid]['vin'] = 0;
-                                                    block['result']['balances'][address][txid]['vout'] = 0;
-                                                    block['result']['balances'][address][txid]['type'] = 'TX';
-                                                }
-                                                block['result']['balances'][address][txid]['value'] += block['result']['tx'][i]['vout'][voutx]['value'];
-                                                block['result']['balances'][address][txid]['vout'] += block['result']['tx'][i]['vout'][voutx]['value'];
+                                                block['result']['analysis'][txid]['balances'][address]['value'] += block['result']['tx'][i]['vout'][voutx]['value'];
+                                                block['result']['analysis'][txid]['vout'] += block['result']['tx'][i]['vout'][voutx]['value'];
+                                                block['result']['analysis'][txid]['balances'][address]['vout'] += block['result']['tx'][i]['vout'][voutx]['value'];
                                                 txtotvout += block['result']['tx'][i]['vout'][voutx]['value'];
                                                 receivingaddress = address;
                                             });
@@ -144,15 +144,17 @@ var Crypto;
                             var blocktotvalue = block['result']['totvin'] + block['result']['generated'];
                             block['result']['fees'] = (block['result']['totvout'] - blocktotvalue) * -1;
                             //CHECKING TRANSACTION TYPE
-                            for (let address in block['result']['balances']) {
-                                for (let txid in block['result']['balances'][address]) {
-                                    if (block['result']['balances'][address][txid]['vin'] > 0) {
-                                        if (block['result']['balances'][address][txid]['vin'] < block['result']['balances'][address][txid]['vout']) {
-                                            block['result']['balances'][address][txid]['type'] = 'STAKE';
+                            for (let txid in block['result']['analysis']) {
+                                if (block['result']['analysis'][txid]['vin'] < block['result']['analysis'][txid]['vout']) {
+                                    for (let address in block['result']['analysis'][txid]['balances']) {
+                                        if (block['result']['analysis'][txid]['balances'][address]['vin'] > 0) {
+                                            if (block['result']['analysis'][txid]['balances'][address]['vin'] < block['result']['analysis'][txid]['balances'][address]['vout']) {
+                                                block['result']['analysis'][txid]['balances'][address]['type'] = 'STAKE';
+                                            }
                                         }
-                                    }
-                                    else {
-                                        block['result']['balances'][address][txid]['type'] = 'REWARD';
+                                        else {
+                                            block['result']['analysis'][txid]['balances'][address]['type'] = 'REWARD';
+                                        }
                                     }
                                 }
                             }

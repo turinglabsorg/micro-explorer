@@ -89,30 +89,13 @@ module Selective {
             var db = new Engine.Db('./db', {})
             var wallet = new Crypto.Wallet
             var block = await wallet.analyzeBlock(analyze[0])
-            for(var address in block['balances']){
-                if(addresses.indexOf(address) !== -1){
-                    for(var txid in block['balances'][address]){
-                        var tx = block['balances'][address][txid]
-                        var stats = db.collection("stats")
-                        stats.findOne({address: address, txid: txid}, function(err, item) {
-                            if(item === null){
-                                stats.insert({
-                                    address: address,
-                                    txid: txid,
-                                    type: tx.type,
-                                    value: tx.value,
-                                    blockhash: block['hash'],
-                                    blockheight: block['height'],
-                                    time: block['time']
-                                })
-                            }
-                        })
-                        var indexes = db.collection("indexes")
-                        indexes.insert({address: address, block: block['hash']})
+            for(var txid in block['analysis']){
+                for(var address in block['analysis'][txid]['balances']){
+                    if(addresses.indexOf(address) !== -1){
+                        var tx = block['analysis'][txid]['balances'][address]
+                        var task = new Selective.Sync
+                        await task.store(address, block, txid, tx)
                     }
-                }else{
-                    var indexes = db.collection("indexes")
-                    indexes.insert({address: address, block: block['hash']})
                 }
             }
             var end = Date.now()
@@ -130,6 +113,28 @@ module Selective {
         }
     }
 
+    private async store(address, block, txid, tx){
+        return new Promise (response => {
+            var db = new Engine.Db('./db', {})
+            var stats = db.collection("stats")
+            stats.findOne({address: address, txid: txid}, function(err, item) {
+                if(item === null){
+                    stats.insert({
+                        address: address,
+                        txid: txid,
+                        type: tx.type,
+                        value: tx.value,
+                        blockhash: block['hash'],
+                        blockheight: block['height'],
+                        time: block['time']
+                    })
+                    var indexes = db.collection("indexes")
+                    indexes.insert({address: address, block: block['hash']})
+                    response('DONE')
+                }
+            })
+        })
+    }
   }
 
 }
