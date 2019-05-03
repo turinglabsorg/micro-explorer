@@ -143,8 +143,12 @@ module Crypto {
                     
                     //CHECKING TRANSACTION TYPE
                     for(let txid in block['result']['analysis']){
-                        if(block['result']['analysis'][txid]['vin'] < block['result']['analysis'][txid]['vout']){
-                            for(let address in block['result']['analysis'][txid]['balances']){
+                        block['result']['analysis'][txid]['movements'] = {}
+                        block['result']['analysis'][txid]['movements']['from'] = []
+                        block['result']['analysis'][txid]['movements']['to'] = []
+
+                        for(let address in block['result']['analysis'][txid]['balances']){
+                            if(block['result']['analysis'][txid]['vin'] < block['result']['analysis'][txid]['vout']){
                                 if(block['result']['analysis'][txid]['balances'][address]['vin'] > 0){
                                     if(block['result']['analysis'][txid]['balances'][address]['vin'] < block['result']['analysis'][txid]['balances'][address]['vout']){
                                         block['result']['analysis'][txid]['balances'][address]['type'] = 'STAKE'
@@ -153,8 +157,16 @@ module Crypto {
                                     block['result']['analysis'][txid]['balances'][address]['type'] = 'REWARD'
                                 }
                             }
+                            if(block['result']['analysis'][txid]['balances'][address]['vin'] > 0){
+                                block['result']['analysis'][txid]['movements']['from'].push(address)
+                            }
+                            if(block['result']['analysis'][txid]['balances'][address]['vout'] > 0){
+                                block['result']['analysis'][txid]['movements']['to'].push(address)
+                            }
                         }
+                        
                     }
+                    delete block['result']['tx']
                     response(block['result'])
                 })   
             })

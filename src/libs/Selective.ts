@@ -90,9 +90,10 @@ module Selective {
                 for(var address in block['analysis'][txid]['balances']){
                     if(addresses.indexOf(address) !== -1){
                         var tx = block['analysis'][txid]['balances'][address]
+                        var movements = block['analysis'][txid]['movements']
                         var task = new Selective.Sync
                         console.log('STORING '+ tx.type +' OF '+ tx.value + ' ' + process.env.COIN + ' FOR ADDRESS ' + address)
-                        await task.store(address, block, txid, tx)
+                        await task.store(address, block, txid, tx, movements)
                     }
                 }
             }
@@ -111,7 +112,7 @@ module Selective {
         }
     }
 
-    private async store(address, block, txid, tx){
+    private async store(address, block, txid, tx, movements){
         return new Promise (response => {
             var db = new Engine.Db('./db', {})
             var stats = db.collection("stats")
@@ -121,6 +122,8 @@ module Selective {
                         address: address,
                         txid: txid,
                         type: tx.type,
+                        from: movements.from,
+                        to: movements.to,
                         value: tx.value,
                         blockhash: block['hash'],
                         blockheight: block['height'],

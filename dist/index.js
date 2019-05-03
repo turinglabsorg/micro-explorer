@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const App_1 = require("./App");
 const Crypto = require("./libs/Crypto");
 const Selective = require("./libs/Selective");
+const Full = require("./libs/Full");
 require('dotenv').config();
 const port = process.env.PORT || 4001;
 App_1.default.engine('html', require('ejs').renderFile);
@@ -14,11 +15,12 @@ App_1.default.listen(port, (err) => {
     wallet.request('getinfo').then(function (info) {
         if (info !== undefined) {
             console.log(process.env.COIN + ' wallet successfully connected.');
+            var task;
             if (process.env.MODE === 'selective') {
-                var task = new Selective.Sync;
+                task = new Selective.Sync;
             }
             else {
-                //NEED TO IMPLEMENT FULL MODE
+                task = new Full.Sync;
             }
             task.init();
         }

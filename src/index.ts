@@ -1,6 +1,7 @@
 import app from './App'
 import * as Crypto from './libs/Crypto'
 import * as Selective from "./libs/Selective"
+import * as Full from "./libs/Full"
 
 require('dotenv').config()
 const port = process.env.PORT || 4001
@@ -14,10 +15,11 @@ app.listen(port, (err) => {
   wallet.request('getinfo').then(function(info){
     if(info !== undefined){
       console.log(process.env.COIN + ' wallet successfully connected.')
+      var task
       if(process.env.MODE === 'selective'){
-        var task = new Selective.Sync
+        task = new Selective.Sync
       }else{
-        //NEED TO IMPLEMENT FULL MODE
+        task = new Full.Sync
       }
       task.init()
     }else{
