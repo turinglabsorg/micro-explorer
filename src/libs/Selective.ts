@@ -25,9 +25,6 @@ module Selective {
                     }
                 })
                 
-                //FIND STORED HASHES
-                var index = db.collection("indexes")
-
                 //FIND ONLY BLOCKS WITH INTERESTING TRANSACTIONS
                 wallet.request('listtransactions',["", 99999999999, 0, true]).then(result => {
                     var transactions = result['result']
@@ -45,7 +42,7 @@ module Selective {
                 console.log('NO ADDRESS TO WATCH, RETRY IN 60s')
                 setTimeout(function(){
                     var task = new Selective.Sync
-                    task.process()
+                    task.init()
                 },60000)
             }
         })
@@ -94,6 +91,7 @@ module Selective {
                     if(addresses.indexOf(address) !== -1){
                         var tx = block['analysis'][txid]['balances'][address]
                         var task = new Selective.Sync
+                        console.log('STORING '+ tx.type +' OF '+ tx.value + ' ' + process.env.COIN + ' FOR ADDRESS ' + address)
                         await task.store(address, block, txid, tx)
                     }
                 }
@@ -101,7 +99,7 @@ module Selective {
             var end = Date.now()
             var elapsed = (end - start) / 1000
             analyze.shift()
-            console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +'s. BLOCKS TO COMPLETE: ' + analyze.length)
+            console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +'s. ' + analyze.length + ' BLOCKS UNTIL END')
             var task = new Selective.Sync
             task.analyze()
         }else{
@@ -131,6 +129,8 @@ module Selective {
                     var indexes = db.collection("indexes")
                     indexes.insert({address: address, block: block['hash']})
                     response('DONE')
+                }else{
+                    response('NO NEED TO INSERT')
                 }
             })
         })
