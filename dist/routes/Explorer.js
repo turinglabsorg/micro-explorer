@@ -41,7 +41,6 @@ function unspent(req, res) {
     if (address.length > 0) {
         var wallet = new Crypto.Wallet;
         wallet.request('listunspent', [0, 99999999999999, [address]]).then(response => {
-            var balance = 0;
             var unspent = response['result'];
             res.json({
                 data: unspent,
@@ -95,8 +94,11 @@ function stats(req, res) {
             for (var i = 0; i < unspent.length; i++) {
                 balance += unspent[i].amount;
             }
+            //TODO
             res.json({
-                data: balance,
+                rewards: {},
+                stake: {},
+                balance: balance,
                 status: 200
             });
         }
