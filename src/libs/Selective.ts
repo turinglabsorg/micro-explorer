@@ -26,7 +26,7 @@ module Selective {
                 })
                 
                 //FIND ONLY BLOCKS WITH INTERESTING TRANSACTIONS
-                wallet.request('listtransactions',["", 99999999999, 0, true]).then(result => {
+                wallet.request('listtransactions',["", 999999999, 0, true]).then(result => {
                     var transactions = result['result']
                     transactions.forEach(function(tx){
                         if(addresses.indexOf(tx.address) !== -1){
@@ -57,7 +57,7 @@ module Selective {
             var address = addresses[ain]
             console.log('PROCESSING ADDRESS ' + address)
             var indexes = db.collection("indexes")
-            indexes.find().toArray(function(err, items) {
+            await indexes.find().toArray(function(err, items) {
                 var scanned = []
                 items.forEach(scan => {
                     scanned.push(scan['block'] + '/' + scan['address'])
@@ -99,8 +99,10 @@ module Selective {
             }
             var end = Date.now()
             var elapsed = (end - start) / 1000
+            var remains = analyze.length
+            var estimated = (elapsed * remains) / 60 / 60;
             analyze.shift()
-            console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +'s. ' + analyze.length + ' BLOCKS UNTIL END')
+            console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +'s. ' + remains + ' BLOCKS UNTIL END. ' + estimated.toFixed(2) + 'h ESTIMATED.')   
             var task = new Selective.Sync
             task.analyze()
         }else{

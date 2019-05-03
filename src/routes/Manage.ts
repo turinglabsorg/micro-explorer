@@ -12,17 +12,16 @@ export function watch(req: express.Request, res: express.Response) {
             var address = body['address']
             
             var wallet = new Crypto.Wallet
-            collection.findOne({address: address}, function(err, item) {
-                wallet.request('importaddress',[address, "", true]).then(function(response){
-                    if(item === null){
-                        collection.insert({blockchain: process.env.COIN, address: address})
-                    }
+            wallet.request('importaddress',[address, address, true]).then(function(response){
+                collection.update(
+                    {blockchain: process.env.COIN, address: address},
+                    {blockchain: process.env.COIN, address: address},
+                    {upsert: true}
+                )
+                res.json({
+                    data: 'WATCHING',
+                    status: 200
                 })
-            })
-
-            res.json({
-                data: 'WATCHING',
-                status: 200
             })
 
         }else{
