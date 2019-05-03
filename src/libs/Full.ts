@@ -5,6 +5,8 @@ import * as Crypto from './Crypto'
 
 var blocks = 0
 var analyze = 0
+var analyzed = 0
+var db = new Engine.Db('./db', {})
 
 module Full {
 
@@ -20,25 +22,29 @@ module Full {
     }
 
     public async process(){
-        var db = new Engine.Db('./db', {})
-        console.log('FOUND ' + blocks + ' BLOCKS IN THE BLOCKCHAIN')
-        var indexes = db.collection("indexes")
-        indexes.find().sort({block: -1}).limit(1).toArray(function(err, last) {
-            if(last !== null && last !== undefined){
-                analyze = parseInt(last[0]['block']) + 1
-            }else{
-                analyze = 1
-            }
+        if(analyzed === 0){
+            console.log('FOUND ' + blocks + ' BLOCKS IN THE BLOCKCHAIN')
+            var indexes = db.collection("indexes")
+            indexes.find().sort({block: -1}).limit(1).toArray(function(err, last) {
+                if(last !== null && last !== undefined){
+                    analyze = parseInt(last[0]['block']) + 1
+                }else{
+                    analyze = 1
+                }
+                var task = new Full.Sync
+                task.analyze()
+            })
+        }else{
+            analyze = analyzed + 1
             var task = new Full.Sync
             task.analyze()
-        })
+        }
     }
 
     public async analyze(){
         if(analyze > 0){
             var start = Date.now()
             console.log('\x1b[32m%s\x1b[0m', 'ANALYZING BLOCK ' + analyze)
-            var db = new Engine.Db('./db', {})
             var wallet = new Crypto.Wallet
             var blockhash = await wallet.request('getblockhash',[analyze])
             var block = await wallet.analyzeBlock(blockhash['result'])
@@ -54,7 +60,8 @@ module Full {
             var end = Date.now()
             var elapsed = (end - start) / 1000
             var remains = blocks - analyze
-            console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +'s. ' + remains + ' BLOCKS UNTIL END')
+            var estimated = (elapsed * remains) / 60 / 60;
+            console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +'s. ' + remains + ' BLOCKS UNTIL END. ' + estimated.toFixed(2) + 'h ESTIMATED.')
             setTimeout(function(){
                 var task = new Full.Sync
                 task.process()
@@ -70,28 +77,31 @@ module Full {
 
     private async store(address, block, txid, tx, movements){
         return new Promise (response => {
-            var db = new Engine.Db('./db', {})
             var stats = db.collection("stats")
-            stats.findOne({address: address, txid: txid}, function(err, item) {
-                if(item === null){
-                    stats.insert({
-                        address: address,
-                        txid: txid,
-                        type: tx.type,
-                        from: movements.from,
-                        to: movements.to,
-                        value: tx.value,
-                        blockhash: block['hash'],
-                        blockheight: block['height'],
-                        time: block['time']
-                    })
-                    var indexes = db.collection("indexes")
-                    indexes.insert({block: block['height']})
-                    response('DONE')
-                }else{
-                    response('NO NEED TO INSERT')
+            stats.update(
+                {
+                    address: address, 
+                    txid: txid
+                },
+                {
+                address: address,
+                txid: txid,
+                type: tx.type,
+                from: movements.from,
+                to: movements.to,
+                value: tx.value,
+                blockhash: block['hash'],
+                blockheight: block['height'],
+                time: block['time']
+                },
+                {
+                    upsert: true
                 }
-            })
+            )
+            var indexes = db.collection("indexes")
+            indexes.insert({block: block['height']})
+            analyzed = block['height']
+            response('DONE')
         })
     }
   }

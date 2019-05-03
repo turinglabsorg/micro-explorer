@@ -116,26 +116,29 @@ module Selective {
         return new Promise (response => {
             var db = new Engine.Db('./db', {})
             var stats = db.collection("stats")
-            stats.findOne({address: address, txid: txid}, function(err, item) {
-                if(item === null){
-                    stats.insert({
-                        address: address,
-                        txid: txid,
-                        type: tx.type,
-                        from: movements.from,
-                        to: movements.to,
-                        value: tx.value,
-                        blockhash: block['hash'],
-                        blockheight: block['height'],
-                        time: block['time']
-                    })
-                    var indexes = db.collection("indexes")
-                    indexes.insert({address: address, block: block['hash']})
-                    response('DONE')
-                }else{
-                    response('NO NEED TO INSERT')
+            stats.update(
+                {
+                    address: address,
+                    txid: txid
+                },
+                {
+                    address: address,
+                    txid: txid,
+                    type: tx.type,
+                    from: movements.from,
+                    to: movements.to,
+                    value: tx.value,
+                    blockhash: block['hash'],
+                    blockheight: block['height'],
+                    time: block['time']
+                },
+                {
+                    upsert: true
                 }
-            })
+            )
+            var indexes = db.collection("indexes")
+            indexes.insert({address: address, block: block['hash']})
+            response('DONE')
         })
     }
   }
