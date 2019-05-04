@@ -32,8 +32,10 @@ module Full {
                 }else{
                     analyze = 1
                 }
-                var task = new Full.Sync
-                task.analyze()
+                if(analyze <= blocks){
+                    var task = new Full.Sync
+                    task.analyze()
+                }
             });
         }else{
             analyze = analyzed + 1

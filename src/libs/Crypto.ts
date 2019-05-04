@@ -40,6 +40,12 @@ module Crypto {
         })
     }
 
+    public async analyzeTransaction(transaction){
+        return new Promise (response => {
+            response('TODO')
+        })
+    }
+
     public async analyzeBlock (block) {
         return new Promise (response => {
             var wallet = new Crypto.Wallet
