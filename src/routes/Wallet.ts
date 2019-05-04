@@ -1,7 +1,6 @@
 import express = require("express")
 import * as Crypto from '../libs/Crypto'
 import * as Utilities from '../libs/Utilities'
-var Engine = require('tingodb')()
 
 export function getinfo(req: express.Request, res: express.Response) {
     var wallet = new Crypto.Wallet;

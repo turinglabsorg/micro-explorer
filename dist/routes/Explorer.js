@@ -9,30 +9,37 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Crypto = require("../libs/Crypto");
-var Engine = require('tingodb')();
+var redis = require("redis");
+var db = redis.createClient();
+const { promisify } = require('util');
+const getmembers = promisify(db.smembers).bind(db);
 function info(req, res) {
     res.json({ status: "ONLINE" });
 }
 exports.info = info;
 ;
 function transactions(req, res) {
-    var address = req.params.address;
-    if (address.length > 0) {
-        var db = new Engine.Db('./db', {});
-        var collection = db.collection("stats");
-        collection.find({ address: address }, { sort: { time: -1 } }).toArray(function (err, items) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var address = req.params.address;
+        if (address.length > 0) {
+            var list = yield getmembers(address + '_tx');
+            var transactions = [];
+            for (var index in list) {
+                var tx = JSON.parse(list[index]);
+                transactions.push(tx);
+            }
             res.json({
-                data: items,
+                data: transactions,
                 status: 200
             });
-        });
-    }
-    else {
-        res.json({
-            data: 'Missing parameter: address',
-            status: 422
-        });
-    }
+        }
+        else {
+            res.json({
+                data: 'Missing parameter: address',
+                status: 422
+            });
+        }
+    });
 }
 exports.transactions = transactions;
 ;
@@ -63,27 +70,16 @@ function unspent(req, res) {
 exports.unspent = unspent;
 ;
 function balance(req, res) {
-    var address = req.params.address;
-    if (address.length > 0) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var address = req.params.address;
+        var list = yield getmembers(address + '_tx');
         var balance = 0;
-        var db = new Engine.Db('./db', {});
-        var collection = db.collection("stats");
-        collection.find({ address: address }, { sort: { time: -1 } }).toArray(function (err, items) {
-            for (var i = 0; i < items.length; i++) {
-                balance += items[i].value;
-            }
-            res.json({
-                data: balance,
-                status: 200
-            });
-        });
-    }
-    else {
-        res.json({
-            data: 'Missing parameter: address',
-            status: 422
-        });
-    }
+        for (var index in list) {
+            var tx = JSON.parse(list[index]);
+            balance += tx.value;
+        }
+        res.json({ data: balance, status: 200 });
+    });
 }
 exports.balance = balance;
 ;
@@ -92,13 +88,6 @@ function stats(req, res) {
         var address = req.params.address;
         if (address.length > 0) {
             var stats = {};
-            var wallet = new Crypto.Wallet;
-            var response = yield wallet.request('listunspent', [0, 99999999999999, [address]]);
-            var balance = 0;
-            var unspent = response['result'];
-            for (var i = 0; i < unspent.length; i++) {
-                balance += unspent[i].amount;
-            }
             //TODO
             res.json({
                 rewards: {},

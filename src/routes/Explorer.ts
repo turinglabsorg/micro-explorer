@@ -1,22 +1,27 @@
 import express = require("express")
 import * as Utilities from '../libs/Utilities'
 import * as Crypto from '../libs/Crypto'
-var Engine = require('tingodb')()
+var redis = require("redis")
+var db = redis.createClient()
+const {promisify} = require('util')
+const getmembers = promisify(db.smembers).bind(db)
 
 export function info(req: express.Request, res: express.Response) {
     res.json({status: "ONLINE"})
 };
 
-export function transactions(req: express.Request, res: express.Response) {
+export async function transactions(req: express.Request, res: express.Response) {
     var address = req.params.address
     if(address.length > 0){
-        var db = new Engine.Db('./db', {})
-        var collection = db.collection("stats")
-        collection.find({address: address}, {sort: {time: -1}}).toArray(function(err, items) {
-            res.json({
-                data: items,
-                status: 200
-            })
+        var list = await getmembers(address +'_tx')
+        var transactions = []
+        for(var index in list){
+            var tx = JSON.parse(list[index])
+            transactions.push(tx)
+        }
+        res.json({
+            data: transactions,
+            status: 200
         })
     }else{
         res.json({
@@ -50,41 +55,21 @@ export function unspent(req: express.Request, res: express.Response) {
     }
 };
 
-export function balance(req: express.Request, res: express.Response) {
+export async function balance(req: express.Request, res: express.Response) {
     var address = req.params.address
-    if(address.length > 0){
-        var balance = 0
-        var db = new Engine.Db('./db', {})
-        var collection = db.collection("stats")
-        collection.find({address: address}, {sort: {time: -1}}).toArray(function(err, items) {
-            for(var i=0; i < items.length; i++){
-                balance += items[i].value
-            }
-            res.json({
-                data: balance,
-                status: 200
-            })
-        })
-    }else{
-        res.json({
-            data: 'Missing parameter: address',
-            status: 422
-        })
+    var list = await getmembers(address +'_tx')
+    var balance = 0
+    for(var index in list){
+        var tx = JSON.parse(list[index])
+        balance += tx.value
     }
+    res.json({data: balance, status: 200})
 };
 
 export async function stats(req: express.Request, res: express.Response) {
     var address = req.params.address
     if(address.length > 0){
         var stats = {}
-        
-        var wallet = new Crypto.Wallet
-        var response = await wallet.request('listunspent',[0,99999999999999,[address]])
-        var balance = 0
-        var unspent = response['result']
-        for(var i=0; i < unspent.length; i++){
-            balance += unspent[i].amount
-        }
         
         //TODO
         res.json({

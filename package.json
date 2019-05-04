@@ -16,21 +16,17 @@
   "dependencies": {
     "@types/node": "7.0.22",
     "body-parser": "^1.18.3",
-    "child_process": "^1.0.2",
     "cors": "^2.8.5",
     "dotenv": "^7.0.0",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "file-type": "^10.9.0",
     "formidable": "^1.2.1",
-    "ipfs": "^0.34.4",
     "lcrypt": "^1.0.2",
     "nodemon": "^1.18.10",
     "opn": "^5.5.0",
-    "request": "^2.88.0",
-    "systray": "^1.0.5",
-    "tingodb": "^0.6.1",
-    "window": "^4.2.6"
+    "redis": "^2.8.0",
+    "request": "^2.88.0"
   },
   "devDependencies": {
     "@types/mocha": "2.2.41",

@@ -1,7 +1,6 @@
 "use strict";
 import * as Utilities from './Utilities'
 let request = require("request")
-var Engine = require('tingodb')()
 
 module Crypto {
 

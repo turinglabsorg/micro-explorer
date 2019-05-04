@@ -1,12 +1,14 @@
 "use strict";
-var Engine = require('tingodb')()
 import express = require("express")
 import * as Crypto from './Crypto'
+var redis = require("redis")
+var db = redis.createClient()
+const {promisify} = require('util')
+const getmembers = promisify(db.smembers).bind(db)
 
 var blocks = 0
 var analyze = 0
 var analyzed = 0
-var db = new Engine.Db('./db', {})
 
 module Full {
 
@@ -24,16 +26,15 @@ module Full {
     public async process(){
         if(analyzed === 0){
             console.log('FOUND ' + blocks + ' BLOCKS IN THE BLOCKCHAIN')
-            var indexes = db.collection("indexes")
-            indexes.find().sort({block: -1}).limit(1).toArray(function(err, last) {
+            db.get("fullindex", function(err, last) {
                 if(last !== null && last !== undefined){
-                    analyze = parseInt(last[0]['block']) + 1
+                    analyze = parseInt(last) + 1
                 }else{
                     analyze = 1
                 }
                 var task = new Full.Sync
                 task.analyze()
-            })
+            });
         }else{
             analyze = analyzed + 1
             var task = new Full.Sync
@@ -77,31 +78,24 @@ module Full {
 
     private async store(address, block, txid, tx, movements){
         return new Promise (response => {
-            var stats = db.collection("stats")
-            stats.update(
+            db.sadd(address + '_tx', JSON.stringify(
                 {
-                    address: address, 
-                    txid: txid
-                },
-                {
-                address: address,
-                txid: txid,
-                type: tx.type,
-                from: movements.from,
-                to: movements.to,
-                value: tx.value,
-                blockhash: block['hash'],
-                blockheight: block['height'],
-                time: block['time']
-                },
-                {
-                    upsert: true
+                    address: address,
+                    txid: txid,
+                    type: tx.type,
+                    from: movements.from,
+                    to: movements.to,
+                    value: tx.value,
+                    blockhash: block['hash'],
+                    blockheight: block['height'],
+                    time: block['time']
                 }
-            )
-            var indexes = db.collection("indexes")
-            indexes.insert({block: block['height']})
-            analyzed = block['height']
-            response('DONE')
+            ), function(err, callback){
+                db.set('fullindex', block['height'],function(err, callback){
+                    analyzed = block['height']
+                    response('DONE')
+                })
+            })
         })
     }
   }

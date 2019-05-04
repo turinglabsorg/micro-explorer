@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const Utilities = require("./Utilities");
 let request = require("request");
-var Engine = require('tingodb')();
 var Crypto;
 (function (Crypto) {
     class Wallet {

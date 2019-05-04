@@ -1,5 +1,4 @@
 "use strict";
-var Engine = require('tingodb')()
 import express = require("express")
 var formidable = require('formidable')
 

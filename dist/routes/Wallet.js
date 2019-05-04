@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Crypto = require("../libs/Crypto");
 const Utilities = require("../libs/Utilities");
-var Engine = require('tingodb')();
 function getinfo(req, res) {
     var wallet = new Crypto.Wallet;
     wallet.request('getinfo').then(function (info) {
