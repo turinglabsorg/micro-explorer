@@ -18,6 +18,7 @@ class App {
         app.express.post('/wallet/getblock', wallet.getblock);
         app.express.post('/watch/:address', manage.watch);
         app.express.post('/unwatch/:address', manage.unwatch);
+        app.express.post('/sync/:address', manage.sync);
         app.express.post('/watchlist', manage.watchlist);
         app.express.get('/', explorer.info);
         app.express.get('/transactions/:address', explorer.transactions);

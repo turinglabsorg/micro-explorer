@@ -24,8 +24,10 @@ class App {
     app.express.get('/wallet/getinfo',wallet.getinfo)
     app.express.post('/wallet/getblock',wallet.getblock)
 
+    //SEEMS IT'S USELESS NOW
     app.express.post('/watch/:address',manage.watch)
     app.express.post('/unwatch/:address',manage.unwatch)
+    //app.express.post('/sync/:address',manage.sync)
     app.express.post('/watchlist',manage.watchlist)
     
     app.express.get('/',explorer.info)

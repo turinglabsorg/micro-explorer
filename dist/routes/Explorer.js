@@ -28,10 +28,7 @@ function transactions(req, res) {
                 var tx = JSON.parse(list[index]);
                 transactions.push(tx);
             }
-            res.json({
-                data: transactions,
-                status: 200
-            });
+            transactions.sort((a, b) => Number(b.time) - Number(a.time));
         }
         else {
             res.json({

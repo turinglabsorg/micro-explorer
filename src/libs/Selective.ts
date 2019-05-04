@@ -14,34 +14,38 @@ module Selective {
 
   export class Sync {
     
-    public init() {
+    public async init() {
         var wallet = new Crypto.Wallet
-        
-        db.smembers("watchlist", function(err, items) {
-            //PUTTING ALL ADDRESSES TOGETHER
-            if(items.length > 0){
-                addresses = items
-                //FIND ONLY BLOCKS WITH INTERESTING TRANSACTIONS
-                wallet.request('listtransactions',["", 999999999, 0, true]).then(result => {
-                    var transactions = result['result']
-                    transactions.forEach(function(tx){
-                        if(addresses.indexOf(tx.address) !== -1){
-                            if(blocks.indexOf(tx.blockhash) === -1){
-                                blocks.push(tx.blockhash)
-                            }
-                        }
-                    })
-                    var task = new Selective.Sync
-                    task.process()
-                })
-            }else{
-                console.log('NO ADDRESS TO WATCH, RETRY IN 60s')
-                setTimeout(function(){
-                    var task = new Selective.Sync
-                    task.init()
-                },60000)
+
+        var addresses = await getmembers("watchlist")
+        //PUTTING ALL ADDRESSES TOGETHER
+        if(addresses.length > 0){
+            console.log(addresses.length + ' DIFFERENT ADDRESSES FOUND.')
+            //FIND ONLY BLOCKS WITH INTERESTING TRANSACTIONS
+            var result = await wallet.request('listtransactions',["", 999999999, 0, true])
+            var transactions = result['result']
+            var indexes = {}
+            for(var i = 0; i < addresses.length; i++){
+                var indexed = await getmembers(addresses[i] + '_indexes')
+                indexes[addresses[i]] = indexed
             }
-        })
+            transactions.forEach(function(tx){
+                if(addresses.indexOf(tx.address) !== -1){
+                    if(indexes[tx.address].indexOf(tx.blockhash) === -1){
+                        blocks.push(tx.blockhash)
+                    }
+                }
+            })
+
+            var task = new Selective.Sync
+            task.process()
+        }else{
+            console.log('NO ADDRESS TO WATCH, RETRY IN 60s')
+            setTimeout(function(){
+                var task = new Selective.Sync
+                task.init()
+            },60000)
+        }
     }
 
     public async process(){
