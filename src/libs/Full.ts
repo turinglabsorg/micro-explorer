@@ -35,6 +35,12 @@ module Full {
                 if(analyze <= blocks){
                     var task = new Full.Sync
                     task.analyze()
+                }else{
+                    console.log('SYNC FINISHED, RESTART IN 30 SECONDS')
+                    setTimeout(function(){
+                        var task = new Full.Sync
+                        task.analyze()
+                    },30000)
                 }
             });
         }else{
@@ -42,6 +48,12 @@ module Full {
             if(analyze <= blocks){
                 var task = new Full.Sync
                 task.analyze()
+            }else{
+                console.log('SYNC FINISHED, RESTART IN 30 SECONDS')
+                setTimeout(function(){
+                    var task = new Full.Sync
+                    task.analyze()
+                },30000)
             }
         }
     }
