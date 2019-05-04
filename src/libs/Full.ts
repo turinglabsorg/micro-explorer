@@ -39,7 +39,7 @@ module Full {
                     console.log('SYNC FINISHED, RESTART IN 30 SECONDS')
                     setTimeout(function(){
                         var task = new Full.Sync
-                        task.analyze()
+                        task.init()
                     },30000)
                 }
             });
@@ -52,7 +52,7 @@ module Full {
                 console.log('SYNC FINISHED, RESTART IN 30 SECONDS')
                 setTimeout(function(){
                     var task = new Full.Sync
-                    task.analyze()
+                    task.init()
                 },30000)
             }
         }

@@ -40,20 +40,18 @@ export function getblock(req: express.Request, res: express.Response) {
 
 export async function transactions(req: express.Request, res: express.Response) {
     var address = req.params.address
-    if(address.length > 0){
-        var list = await getmembers(address +'_tx')
-        var transactions = []
-        for(var index in list){
-            var tx = JSON.parse(list[index])
-            transactions.push(tx)
-        }
-        transactions.sort((a, b) => Number(b.time) - Number(a.time));        
-    }else{
-        res.json({
-            data: 'Missing parameter: address',
-            status: 422
-        })
+    
+    var list = await getmembers(address +'_tx')
+    var transactions = []
+    for(var index in list){
+        var tx = JSON.parse(list[index])
+        transactions.push(tx)
     }
+    transactions.sort((a, b) => Number(b.time) - Number(a.time));        
+    res.json({
+        data: transactions,
+        status: 200
+    })
 };
 
 export function unspent(req: express.Request, res: express.Response) {
