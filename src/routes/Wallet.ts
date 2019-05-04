@@ -8,25 +8,3 @@ export function getinfo(req: express.Request, res: express.Response) {
         res.json(info['result'])
     })
 };
-
-export function getblock(req: express.Request, res: express.Response) {
-    var wallet = new Crypto.Wallet;
-    var utilities = new Utilities.Parser
-    utilities.body(req).then(function(body){
-        if(body['block']){
-            wallet.request('getblockhash', [parseInt(body['block'])]).then(function(blockhash){
-                wallet.analyzeBlock(blockhash['result']).then(response => {
-                    res.json({
-                        data: response,
-                        status: 200
-                    })
-                })
-            })
-        }else{
-            res.json({
-                data: 'Missing parameter: block',
-                status: 422
-            })
-        }
-    })
-};

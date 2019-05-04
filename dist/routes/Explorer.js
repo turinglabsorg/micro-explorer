@@ -18,6 +18,20 @@ function info(req, res) {
 }
 exports.info = info;
 ;
+function getblock(req, res) {
+    var wallet = new Crypto.Wallet;
+    var block = req.params.block;
+    wallet.request('getblockhash', [parseInt(block)]).then(function (blockhash) {
+        wallet.analyzeBlock(blockhash['result']).then(response => {
+            res.json({
+                data: response,
+                status: 200
+            });
+        });
+    });
+}
+exports.getblock = getblock;
+;
 function transactions(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         var address = req.params.address;
@@ -69,13 +83,18 @@ exports.unspent = unspent;
 function balance(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         var address = req.params.address;
-        var list = yield getmembers(address + '_tx');
+        var wallet = new Crypto.Wallet;
         var balance = 0;
-        for (var index in list) {
-            var tx = JSON.parse(list[index]);
-            balance += tx.value;
-        }
-        res.json({ data: balance, status: 200 });
+        wallet.request('listunspent', [0, 9999999, [address]]).then(response => {
+            var unspent = response['result'];
+            for (var i = 0; i < unspent.length; i++) {
+                balance += unspent[i].amount;
+            }
+            res.json({
+                balance: balance,
+                status: 200
+            });
+        });
     });
 }
 exports.balance = balance;

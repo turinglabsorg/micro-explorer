@@ -1,7 +1,5 @@
 import * as express from 'express'
-import * as Utilities from './libs/Utilities'
 import * as wallet from "./routes/Wallet"
-import * as manage from "./routes/Manage"
 import * as explorer from "./routes/Explorer"
 
 var bodyParser = require('body-parser')
@@ -22,15 +20,9 @@ class App {
     app.express.use(cors())
     
     app.express.get('/wallet/getinfo',wallet.getinfo)
-    app.express.post('/wallet/getblock',wallet.getblock)
 
-    //SEEMS IT'S USELESS NOW
-    app.express.post('/watch/:address',manage.watch)
-    app.express.post('/unwatch/:address',manage.unwatch)
-    //app.express.post('/sync/:address',manage.sync)
-    app.express.post('/watchlist',manage.watchlist)
-    
     app.express.get('/',explorer.info)
+    app.express.post('/block/:block',explorer.getblock)
     app.express.get('/transactions/:address', explorer.transactions)
     app.express.get('/balance/:address', explorer.balance)
     app.express.get('/stats/:address', explorer.stats)

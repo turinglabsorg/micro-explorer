@@ -10,6 +10,19 @@ export function info(req: express.Request, res: express.Response) {
     res.json({status: "ONLINE"})
 };
 
+export function getblock(req: express.Request, res: express.Response) {
+    var wallet = new Crypto.Wallet;
+    var block = req.params.block
+    wallet.request('getblockhash', [parseInt(block)]).then(function(blockhash){
+        wallet.analyzeBlock(blockhash['result']).then(response => {
+            res.json({
+                data: response,
+                status: 200
+            })
+        })
+    })
+};
+
 export async function transactions(req: express.Request, res: express.Response) {
     var address = req.params.address
     if(address.length > 0){
@@ -54,13 +67,18 @@ export function unspent(req: express.Request, res: express.Response) {
 
 export async function balance(req: express.Request, res: express.Response) {
     var address = req.params.address
-    var list = await getmembers(address +'_tx')
+    var wallet = new Crypto.Wallet
     var balance = 0
-    for(var index in list){
-        var tx = JSON.parse(list[index])
-        balance += tx.value
-    }
-    res.json({data: balance, status: 200})
+    wallet.request('listunspent',[0,9999999,[address]]).then(response => {
+        var unspent = response['result']
+        for(var i = 0; i < unspent.length; i++){
+            balance += unspent[i].amount
+        }
+        res.json({
+            balance: balance,
+            status: 200
+        })
+    })
 };
 
 export async function stats(req: express.Request, res: express.Response) {
