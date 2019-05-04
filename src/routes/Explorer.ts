@@ -80,18 +80,17 @@ export function unspent(req: express.Request, res: express.Response) {
 
 export async function balance(req: express.Request, res: express.Response) {
     var address = req.params.address
-    var wallet = new Crypto.Wallet
-    var balance = 0
-    wallet.request('listunspent',[0,9999999,[address]]).then(response => {
-        var unspent = response['result']
-        for(var i = 0; i < unspent.length; i++){
-            balance += unspent[i].amount
+        var balance = 0
+        var list = await getmembers(address +'_tx')
+        for(var index in list){
+            var tx = JSON.parse(list[index])
+            balance += tx.value
         }
         res.json({
             balance: balance,
             status: 200
         })
-    })
+   
 };
 
 export async function stats(req: express.Request, res: express.Response) {
