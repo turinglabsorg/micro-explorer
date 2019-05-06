@@ -48,6 +48,13 @@ var Crypto;
                 });
             });
         }
+        analyzeTransaction(transaction) {
+            return __awaiter(this, void 0, void 0, function* () {
+                return new Promise(response => {
+                    response('TODO');
+                });
+            });
+        }
         analyzeBlock(block) {
             return __awaiter(this, void 0, void 0, function* () {
                 return new Promise(response => {

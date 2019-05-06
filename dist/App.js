@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const wallet = require("./routes/Wallet");
 const explorer = require("./routes/Explorer");
+const manage = require("./routes/Manage");
 var bodyParser = require('body-parser');
 var cors = require('cors');
 class App {
@@ -14,8 +15,13 @@ class App {
         app.express.use(express.static('public'));
         app.express.use(cors());
         app.express.get('/wallet/getinfo', wallet.getinfo);
+        app.express.get('/watch/:address', manage.watch);
+        app.express.get('/unwatch/:address', manage.unwatch);
+        app.express.get('/sync/:address', manage.sync);
+        app.express.get('/watchlist', manage.watchlist);
         app.express.get('/', explorer.info);
-        app.express.post('/block/:block', explorer.getblock);
+        app.express.get('/block/:block', explorer.getblock);
+        app.express.get('/transaction/:txid', explorer.gettransaction);
         app.express.get('/transactions/:address', explorer.transactions);
         app.express.get('/balance/:address', explorer.balance);
         app.express.get('/stats/:address', explorer.stats);

@@ -10,7 +10,7 @@ var blocks = 0
 var analyze = 0
 var analyzed = 0
 
-module Full {
+module Daemon {
 
   export class Sync {
     
@@ -18,14 +18,14 @@ module Full {
         var wallet = new Crypto.Wallet
         wallet.request('getinfo').then(info => {
             blocks = info['result'].blocks
-            var task = new Full.Sync
+            console.log('FOUND ' + blocks + ' BLOCKS IN THE BLOCKCHAIN')
+            var task = new Daemon.Sync
             task.process()
         })
     }
 
     public async process(){
         if(analyzed === 0){
-            console.log('FOUND ' + blocks + ' BLOCKS IN THE BLOCKCHAIN')
             db.get("fullindex", function(err, last) {
                 if(last !== null && last !== undefined){
                     analyze = parseInt(last) + 1
@@ -33,12 +33,12 @@ module Full {
                     analyze = 1
                 }
                 if(analyze <= blocks){
-                    var task = new Full.Sync
+                    var task = new Daemon.Sync
                     task.analyze()
                 }else{
                     console.log('SYNC FINISHED, RESTART IN 30 SECONDS')
                     setTimeout(function(){
-                        var task = new Full.Sync
+                        var task = new Daemon.Sync
                         task.init()
                     },30000)
                 }
@@ -46,12 +46,12 @@ module Full {
         }else{
             analyze = analyzed + 1
             if(analyze <= blocks){
-                var task = new Full.Sync
+                var task = new Daemon.Sync
                 task.analyze()
             }else{
                 console.log('SYNC FINISHED, RESTART IN 30 SECONDS')
                 setTimeout(function(){
-                    var task = new Full.Sync
+                    var task = new Daemon.Sync
                     task.init()
                 },30000)
             }
@@ -65,13 +65,22 @@ module Full {
             var wallet = new Crypto.Wallet
             var blockhash = await wallet.request('getblockhash',[analyze])
             var block = await wallet.analyzeBlock(blockhash['result'])
+            
             for(var txid in block['analysis']){
                 for(var address in block['analysis'][txid]['balances']){
                     var tx = block['analysis'][txid]['balances'][address]
                     var movements = block['analysis'][txid]['movements']
-                    var task = new Full.Sync
-                    console.log('STORING '+ tx.type +' OF '+ tx.value + ' ' + process.env.COIN + ' FOR ADDRESS ' + address)
-                    await task.store(address, block, txid, tx, movements)
+                    if(process.env.MODE === 'full'){
+                        var task = new Daemon.Sync
+                        console.log('STORING '+ tx.type +' OF '+ tx.value + ' ' + process.env.COIN + ' FOR ADDRESS ' + address)
+                        await task.store(address, block, txid, tx, movements)
+                    }else{
+                        if(movements.from.indexOf(address) !== -1 || movements.to.indexOf(address) !== -1){
+                            var task = new Daemon.Sync
+                            console.log('STORING '+ tx.type +' OF '+ tx.value + ' ' + process.env.COIN + ' FOR ADDRESS ' + address)
+                            await task.store(address, block, txid, tx, movements)
+                        }
+                    }
                 }
             }
             var end = Date.now()
@@ -79,14 +88,16 @@ module Full {
             var remains = blocks - analyze
             var estimated = (elapsed * remains) / 60 / 60;
             console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +'s. ' + remains + ' BLOCKS UNTIL END. ' + estimated.toFixed(2) + 'h ESTIMATED.')
+            await db.set('fullindex', block['height'])
+            analyzed = block['height']
             setTimeout(function(){
-                var task = new Full.Sync
+                var task = new Daemon.Sync
                 task.process()
             },100)
         }else{
             console.log('\x1b[41m%s\x1b[0m', 'ANALYZED EVERYTHING REBOOTING PROCESS IN 30 SECONDS')
             setTimeout(function(){
-                var task = new Full.Sync
+                var task = new Daemon.Sync
                 task.init()
             },30000)
         }
@@ -107,10 +118,7 @@ module Full {
                     time: block['time']
                 }
             ), function(err, callback){
-                db.set('fullindex', block['height'],function(err, callback){
-                    analyzed = block['height']
-                    response('DONE')
-                })
+                response(block['height'])
             })
         })
     }
@@ -118,4 +126,4 @@ module Full {
 
 }
 
-export = Full;
+export = Daemon;

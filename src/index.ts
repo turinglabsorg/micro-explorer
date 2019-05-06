@@ -1,6 +1,6 @@
 import app from './App'
 import * as Crypto from './libs/Crypto'
-import * as Full from "./libs/Full"
+import * as Daemon from "./libs/Daemon"
 
 require('dotenv').config()
 const port = process.env.PORT || 4001
@@ -15,7 +15,7 @@ app.listen(port, (err) => {
     if(info !== undefined){
       console.log(process.env.COIN + ' wallet successfully connected.')
       var task
-      task = new Full.Sync
+      task = new Daemon.Sync
       task.init()
     }else{
       console.log('Can\'t communicate with wallet, please check RPC.')

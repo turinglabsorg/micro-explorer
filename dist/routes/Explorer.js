@@ -18,6 +18,22 @@ function info(req, res) {
 }
 exports.info = info;
 ;
+function gettransaction(req, res) {
+    var wallet = new Crypto.Wallet;
+    var txid = req.params.txid;
+    wallet.request('getrawtransaction', [txid]).then(function (rawtransaction) {
+        wallet.request('decoderawransaction', [txid]).then(function (rawtransaction) {
+            wallet.analyzeTransaction(rawtransaction['result']).then(response => {
+                res.json({
+                    data: response,
+                    status: 200
+                });
+            });
+        });
+    });
+}
+exports.gettransaction = gettransaction;
+;
 function getblock(req, res) {
     var wallet = new Crypto.Wallet;
     var block = req.params.block;
@@ -35,21 +51,17 @@ exports.getblock = getblock;
 function transactions(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         var address = req.params.address;
-        if (address.length > 0) {
-            var list = yield getmembers(address + '_tx');
-            var transactions = [];
-            for (var index in list) {
-                var tx = JSON.parse(list[index]);
-                transactions.push(tx);
-            }
-            transactions.sort((a, b) => Number(b.time) - Number(a.time));
+        var list = yield getmembers(address + '_tx');
+        var transactions = [];
+        for (var index in list) {
+            var tx = JSON.parse(list[index]);
+            transactions.push(tx);
         }
-        else {
-            res.json({
-                data: 'Missing parameter: address',
-                status: 422
-            });
-        }
+        transactions.sort((a, b) => Number(b.time) - Number(a.time));
+        res.json({
+            data: transactions,
+            status: 200
+        });
     });
 }
 exports.transactions = transactions;
@@ -83,17 +95,15 @@ exports.unspent = unspent;
 function balance(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         var address = req.params.address;
-        var wallet = new Crypto.Wallet;
         var balance = 0;
-        wallet.request('listunspent', [0, 9999999, [address]]).then(response => {
-            var unspent = response['result'];
-            for (var i = 0; i < unspent.length; i++) {
-                balance += unspent[i].amount;
-            }
-            res.json({
-                balance: balance,
-                status: 200
-            });
+        var list = yield getmembers(address + '_tx');
+        for (var index in list) {
+            var tx = JSON.parse(list[index]);
+            balance += tx.value;
+        }
+        res.json({
+            balance: balance,
+            status: 200
         });
     });
 }

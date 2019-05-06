@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const App_1 = require("./App");
 const Crypto = require("./libs/Crypto");
-const Full = require("./libs/Full");
+const Daemon = require("./libs/Daemon");
 require('dotenv').config();
 const port = process.env.PORT || 4001;
 App_1.default.engine('html', require('ejs').renderFile);
@@ -15,7 +15,7 @@ App_1.default.listen(port, (err) => {
         if (info !== undefined) {
             console.log(process.env.COIN + ' wallet successfully connected.');
             var task;
-            task = new Full.Sync;
+            task = new Daemon.Sync;
             task.init();
         }
         else {
