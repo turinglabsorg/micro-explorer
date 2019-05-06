@@ -15,6 +15,7 @@ npm install pm2 -g
 #DOWNLOAD SOURCES
 git clone https://github.com/turinglabsorg/micro-explorer
 mv micro-explorer lyra/explorer
+touch explorer/dist/.env
 
 echo "PORT=3001
 COIN=LYRA
