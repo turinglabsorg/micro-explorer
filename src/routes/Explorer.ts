@@ -63,30 +63,6 @@ export async function transactions(req: express.Request, res: express.Response) 
     })
 };
 
-export function unspent(req: express.Request, res: express.Response) {
-    var address = req.params.address
-    if(address.length > 0){
-        var wallet = new Crypto.Wallet
-        var balance = 0
-        wallet.request('listunspent',[0,9999999,[address]]).then(response => {
-            var unspent = response['result']
-            for(var i = 0; i < unspent.length; i++){
-                balance += unspent[i].amount
-            }
-            res.json({
-                balance: balance,
-                unspent: unspent,
-                status: 200
-            })
-        })
-    }else{
-        res.json({
-            data: 'Missing parameter: address',
-            status: 422
-        })
-    }
-};
-
 export async function balance(req: express.Request, res: express.Response) {
     var address = req.params.address
         var balance = 0
