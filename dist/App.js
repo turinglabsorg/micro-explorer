@@ -26,6 +26,7 @@ class App {
         app.express.get('/transactions/:address', explorer.transactions);
         app.express.get('/balance/:address', explorer.balance);
         app.express.get('/stats/:address', explorer.stats);
+        app.express.get('/unspent/:address', explorer.unspent);
     }
 }
 exports.default = new App().express;

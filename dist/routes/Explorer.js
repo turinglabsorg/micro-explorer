@@ -20,11 +20,30 @@ exports.info = info;
 ;
 function resync(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield db.set('indexreset', true);
-        res.json({
-            data: 'INDEX RESETTED, STARTING FROM BLOCK 0',
-            status: 200
-        });
+        if (process.env.PERMISSIONS === 'private') {
+            yield db.set('indexreset', true);
+            res.json({
+                data: 'INDEX RESETTED, STARTING FROM BLOCK 0',
+                status: 200
+            });
+        }
+        else {
+            if (!req.headers.authorization) {
+                res.status(403).json({ error: 'UNAUTHORIZED' });
+            }
+            else {
+                if (req.headers.authorization === 'Bearer ' + process.env.BEARER) {
+                    yield db.set('indexreset', true);
+                    res.json({
+                        data: 'INDEX RESETTED, STARTING FROM BLOCK 0',
+                        status: 200
+                    });
+                }
+                else {
+                    res.status(403).json({ error: 'UNAUTHORIZED', status: 403 });
+                }
+            }
+        }
     });
 }
 exports.resync = resync;
@@ -76,6 +95,30 @@ function transactions(req, res) {
     });
 }
 exports.transactions = transactions;
+;
+function unspent(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var address = req.params.address;
+        var wallet = new Crypto.Wallet;
+        var balance = 0;
+        var watchlist = yield getmembers('watchlist');
+        if (watchlist.indexOf(address) === -1) {
+            yield wallet.request('importaddress', [address, address, true]);
+        }
+        wallet.request('listunspent', [0, 9999999, [address]]).then(response => {
+            var unspent = response['result'];
+            for (var i = 0; i < unspent.length; i++) {
+                balance += unspent[i].amount;
+            }
+            res.json({
+                balance: balance,
+                unspent: unspent,
+                status: 200
+            });
+        });
+    });
+}
+exports.unspent = unspent;
 ;
 function balance(req, res) {
     return __awaiter(this, void 0, void 0, function* () {

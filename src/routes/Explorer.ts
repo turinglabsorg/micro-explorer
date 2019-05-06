@@ -12,11 +12,27 @@ export function info(req: express.Request, res: express.Response) {
 };
 
 export async function resync(req: express.Request, res: express.Response) {
-    await db.set('indexreset', true)
-    res.json({
-        data: 'INDEX RESETTED, STARTING FROM BLOCK 0',
-        status: 200
-    })
+    if(process.env.PERMISSIONS === 'private'){
+        await db.set('indexreset', true)
+        res.json({
+            data: 'INDEX RESETTED, STARTING FROM BLOCK 0',
+            status: 200
+        })
+    }else{
+        if (!req.headers.authorization) {
+            res.status(403).json({error: 'UNAUTHORIZED'})
+        }else{
+            if(req.headers.authorization === 'Bearer ' + process.env.BEARER){
+                await db.set('indexreset', true)
+                res.json({
+                    data: 'INDEX RESETTED, STARTING FROM BLOCK 0',
+                    status: 200
+                })
+            }else{
+                res.status(403).json({error: 'UNAUTHORIZED', status: 403})
+            }
+        }
+    }
 };
 
 export function gettransaction(req: express.Request, res: express.Response) {
@@ -60,6 +76,27 @@ export async function transactions(req: express.Request, res: express.Response) 
     res.json({
         data: transactions,
         status: 200
+    })
+};
+
+export async function unspent(req: express.Request, res: express.Response) {
+    var address = req.params.address
+    var wallet = new Crypto.Wallet
+    var balance = 0
+    var watchlist = await getmembers('watchlist')
+    if(watchlist.indexOf(address) === -1){
+        await wallet.request('importaddress',[address, address, true])
+    }
+    wallet.request('listunspent',[0,9999999,[address]]).then(response => {
+        var unspent = response['result']
+        for(var i = 0; i < unspent.length; i++){
+            balance += unspent[i].amount
+        }
+        res.json({
+            balance: balance,
+            unspent: unspent,
+            status: 200
+        })
     })
 };
 
