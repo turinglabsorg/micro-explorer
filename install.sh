@@ -24,7 +24,7 @@ RPCPORT=42223
 RPCADDRESS=localhost
 DEBUG=true
 MODE=selective
-PERMISSIONS=private" > explorer/.env
+PERMISSIONS=private" > explorer/dist/.env
 
 cd lyra/explorer
 npm install
