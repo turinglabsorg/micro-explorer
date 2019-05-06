@@ -18,6 +18,17 @@ function info(req, res) {
 }
 exports.info = info;
 ;
+function resync(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield db.set('indexreset', true);
+        res.json({
+            data: 'INDEX RESETTED, STARTING FROM BLOCK 0',
+            status: 200
+        });
+    });
+}
+exports.resync = resync;
+;
 function gettransaction(req, res) {
     var wallet = new Crypto.Wallet;
     var txid = req.params.txid;
@@ -113,12 +124,67 @@ function stats(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         var address = req.params.address;
         if (address.length > 0) {
-            var stats = {};
-            //TODO
+            var received = 0;
+            var sent = 0;
+            var balance = 0;
+            var stats = {
+                rewards: {
+                    count: 0,
+                    amount: 0,
+                    stats: {},
+                    txns: []
+                },
+                stake: {
+                    count: 0,
+                    amount: 0,
+                    stats: {},
+                    txns: []
+                }
+            };
+            var list = yield getmembers(address + '_tx');
+            var transactions = [];
+            for (var index in list) {
+                var unordered = JSON.parse(list[index]);
+                transactions.push(unordered);
+            }
+            transactions.sort((a, b) => Number(a.time) - Number(b.time));
+            for (var index in transactions) {
+                var tx = transactions[index];
+                if (tx.value > 0) {
+                    received += tx.value;
+                }
+                else {
+                    sent += tx.value;
+                }
+                balance += tx.value;
+                var datetime = new Date(tx.time * 1000);
+                var date = datetime.getFullYear() + '-' + ('0' + (datetime.getMonth() + 1)).slice(-2) + '-' + ('0' + datetime.getDate()).slice(-2);
+                if (tx.type === 'STAKE') {
+                    stats.stake.count++;
+                    stats.stake.amount += tx.value;
+                    stats.stake.txns.push(tx);
+                    if (stats.stake.stats[date] === undefined) {
+                        stats.stake.stats[date] = 0;
+                    }
+                    stats.stake.stats[date] += tx.value;
+                }
+                if (tx.type === 'REWARD') {
+                    stats.rewards.count++;
+                    stats.rewards.amount += tx.value;
+                    stats.rewards.txns.push(tx);
+                    if (stats.rewards.stats[date] === undefined) {
+                        stats.rewards.stats[date] = 0;
+                    }
+                    stats.rewards.stats[date] += tx.value;
+                }
+            }
+            sent = sent * -1;
             res.json({
-                rewards: {},
-                stake: {},
                 balance: balance,
+                received: received,
+                sent: sent,
+                rewards: stats.rewards,
+                stake: stats.stake,
                 status: 200
             });
         }

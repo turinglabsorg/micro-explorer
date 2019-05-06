@@ -20,13 +20,14 @@ class App {
     app.express.use(cors())
     
     app.express.get('/wallet/getinfo',wallet.getinfo)
+    app.express.get('/wallet/masternodelist',wallet.getmasternodelist)
 
     app.express.get('/watch/:address',manage.watch)
     app.express.get('/unwatch/:address',manage.unwatch)
-    app.express.get('/sync/:address',manage.sync)
     app.express.get('/watchlist',manage.watchlist)
     
     app.express.get('/',explorer.info)
+    app.express.get('/resync',explorer.resync)
     app.express.get('/block/:block',explorer.getblock)
     app.express.get('/transaction/:txid', explorer.gettransaction)
     app.express.get('/transactions/:address', explorer.transactions)
