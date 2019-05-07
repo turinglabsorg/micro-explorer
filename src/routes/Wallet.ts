@@ -9,7 +9,7 @@ const get = promisify(db.get).bind(db)
 
 export async function getinfo(req: express.Request, res: express.Response) {
     var wallet = new Crypto.Wallet;
-    var lastindexed = await get("fullindex")
+    var lastindexed = await get("fullindex_" + process.env.COIN)
     var watchlist = await getmembers("watchlist")
 
     wallet.request('getinfo').then(function(info){
