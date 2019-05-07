@@ -79,7 +79,7 @@ module Daemon {
                             }
                         }
                         for(var check in movements.to){
-                            if(watchlist.indexOf(movements.from[check]) !== -1){
+                            if(watchlist.indexOf(movements.to[check]) !== -1){
                                 insert = true
                             }
                         }
