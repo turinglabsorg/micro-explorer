@@ -74,13 +74,12 @@ module Daemon {
                     }else{
                         var insert = false
                         for(var check in movements.from){
-                            if(watchlist.indexOf(check) !== -1){
+                            if(watchlist.indexOf(movements.from[check]) !== -1){
                                 insert = true
                             }
                         }
-                        var insert = false
                         for(var check in movements.to){
-                            if(watchlist.indexOf(check) !== -1){
+                            if(watchlist.indexOf(movements.from[check]) !== -1){
                                 insert = true
                             }
                         }

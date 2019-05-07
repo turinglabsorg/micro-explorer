@@ -17,7 +17,7 @@ const get = promisify(db.get).bind(db);
 function getinfo(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         var wallet = new Crypto.Wallet;
-        var lastindexed = yield get("fullindex");
+        var lastindexed = yield get("fullindex_" + process.env.COIN);
         var watchlist = yield getmembers("watchlist");
         wallet.request('getinfo').then(function (info) {
             info['result']['indexed'] = parseInt(lastindexed);
