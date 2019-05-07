@@ -31,7 +31,7 @@ module Daemon {
 
     public async process(){
         var reset = await get('indexreset')
-        db.get("fullindex", function(err, last) {
+        db.get("fullindex_" + process.env.COIN, function(err, last) {
             if(reset === null){
                 if(last !== null && last !== undefined){
                     analyze = parseInt(last) + 1
@@ -97,7 +97,7 @@ module Daemon {
             var remains = blocks - analyze
             var estimated = (elapsed * remains) / 60 / 60;
             console.log('\x1b[33m%s\x1b[0m', 'FINISHED IN '+ elapsed +'s. ' + remains + ' BLOCKS UNTIL END. ' + estimated.toFixed(2) + 'h ESTIMATED.')
-            await db.set('fullindex', block['height'])
+            await db.set("fullindex_" + process.env.COIN, block['height'])
             setTimeout(function(){
                 var task = new Daemon.Sync
                 task.process()

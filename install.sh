@@ -18,15 +18,7 @@ if [ $1 -a $2 -a $3 -a $4 ]; then
     mv micro-explorer $1/explorer
     touch $1/explorer/dist/.env
 
-    echo "PORT=3001
-    COIN=$1
-    RPCUSER=$2
-    RPCPASSWORD=$3
-    RPCPORT=$4
-    RPCADDRESS=localhost
-    DEBUG=true
-    MODE=selective
-    PERMISSIONS=private" > $1/explorer/dist/.env
+    echo "COIN=$1\nRPCUSER=$2\nRPCPASSWORD=$3\nRPCPORT=$4\nRPCADDRESS=localhost\nDEBUG=true\nMODE=selective\nPERMISSIONS=private" > $1/explorer/dist/.env
 
     cd $1/explorer
     npm install
