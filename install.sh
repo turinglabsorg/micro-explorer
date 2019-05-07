@@ -15,8 +15,8 @@ if [ $1 -a $2 -a $3 -a $4 ]; then
 
     #DOWNLOAD SOURCES
     git clone https://github.com/turinglabsorg/micro-explorer
-    mv micro-explorer lyra/explorer
-    touch explorer/dist/.env
+    mv micro-explorer $1/explorer
+    touch $1/explorer/dist/.env
 
     echo "PORT=3001
     COIN=$1
@@ -26,13 +26,13 @@ if [ $1 -a $2 -a $3 -a $4 ]; then
     RPCADDRESS=localhost
     DEBUG=true
     MODE=selective
-    PERMISSIONS=private" > explorer/dist/.env
+    PERMISSIONS=private" > $1/explorer/dist/.env
 
-    cd lyra/explorer
+    cd $1/explorer
     npm install
     npm run tsc
     cd dist
     pm2 start index.js
 else
-    echo "ARGUMENTS NEEDED: coin rpcuser rpcpassword rpcport"
+    echo "ARGUMENTS NEEDED: coinfolder rpcuser rpcpassword rpcport"
 fi
