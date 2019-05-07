@@ -18,9 +18,6 @@ module Daemon {
     
     public async init() {
         var wallet = new Crypto.Wallet
-        if(process.env.MODE === 'selective'){
-            watchlist = await getmembers('watchlist')
-        }
         wallet.request('getinfo').then(info => {
             blocks = info['result'].blocks
             console.log('FOUND ' + blocks + ' BLOCKS IN THE BLOCKCHAIN')
@@ -57,6 +54,9 @@ module Daemon {
 
     public async analyze(){
         if(analyze > 0){
+            if(process.env.MODE === 'selective'){
+                watchlist = await getmembers('watchlist')
+            }
             var start = Date.now()
             console.log('\x1b[32m%s\x1b[0m', 'ANALYZING BLOCK ' + analyze)
             var wallet = new Crypto.Wallet
