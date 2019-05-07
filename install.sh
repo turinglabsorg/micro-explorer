@@ -32,8 +32,8 @@ if [ $1 -a $2 -a $3 -a $4 ]; then
     npm run tsc
     cd dist
     pm2 start index.js --watch --name $1-explorer
-    cd ../../
-    rm install.sh
+    cd ../../../
+    rm install.shW
 else
     echo "ARGUMENTS NEEDED: coinfolder rpcuser rpcpassword rpcport"
 fi
