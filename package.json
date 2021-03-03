@@ -38,7 +38,7 @@
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-promise": "3.5.0",
     "mocha": "^6.0.2",
-    "pug": "^2.0.3",
+    "pug": "^3.0.1",
     "supertest": "3.0.0",
     "tsc": "1.20150623.0",
     "typescript": "2.3.3",
