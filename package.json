@@ -37,7 +37,7 @@
     "eslint-config-airbnb-base": "11.2.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-promise": "3.5.0",
-    "mocha": "^6.0.2",
+    "mocha": "^10.2.0",
     "pug": "^2.0.3",
     "supertest": "3.0.0",
     "tsc": "1.20150623.0",
